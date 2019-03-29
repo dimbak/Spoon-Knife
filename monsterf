@@ -1,0 +1,100 @@
+function rapto_get_sizes() {
+  global $product;
+
+  if ($product->is_type( 'variable' )) {
+
+    // Get the available variations for the variable product
+    $available_variations = $product->get_available_variations();
+    //print_r($available_variations);
+   
+
+   
+    echo "<div class='rapto-available-title'>Διαθέσιμα μεγέθη</div>";
+    echo "<div class='rapto-available-sizes-container'>";
+      
+
+    // Iterating through each available product variation
+    foreach( $available_variations as $key => $values ) {
+        
+      // Get the term color name
+      //print_r($values);
+      // epidi to slug einai diaforetiko ana megethos kai den to xero kano to parakato 
+      // $ to available_variations einai multidimensional array, ego thelo na vro to $available_variations[0][1] alla den ginetai gia auto kano to parakato 
+      //https://www.codecademy.com/en/forum_questions/52451144f10c60a522007e3e
+      
+        $allKeys = array_keys($values['attributes']);
+        // the keys are the taxonomies of each size 
+        //print_r($allKeys);
+
+        $allValues = array_values($values['attributes']);
+        // the values are the variation id ! 
+        //print_r($allValues);
+        //echo "<br />";
+        
+        $attribute_color = $allValues[0];
+        
+        //echo $attribute_color;
+        
+        
+        $tempIt = $allKeys[0];
+        // echo $tempIt;
+        //echo "<br />";
+        $theTaxonomy = strstr($tempIt,'p',false);
+        // echo $theTaxonomy;
+        //echo "<br />";
+        
+        $wp_term = get_term_by( 'slug', $attribute_color, $theTaxonomy );
+
+        //print_r($wp_term);
+        
+        $term_name = $wp_term->name; // actual size ie 35, 36
+        
+
+        // Get the variation quantity
+        $variation_obj = wc_get_product( $values['variation_id'] );
+        
+        $stock_qty = $variation_obj->get_stock_quantity(); // Stock qty
+        
+        if ($stock_qty > 0 ) {
+              //echo $stock_qty;
+           //   $whole_term = explode(" ",$term_name);
+            //  echo "<div class='rapto-available-sizes'>".$whole_term[0].'<sup>'.$whole_term[1].'</sup>'."</div>";
+            
+
+              $the_strings = array('XS','S','Μ','L');
+              
+              //echo $term_name."<br />";
+              
+
+              //$sort_array[] = $term_name;
+
+              if (in_array($term_name, $the_strings)) {
+                   $sort_string_array[] = $term_name;
+                   //echo "string";
+              } else {
+                   $sort_number_array[] = $term_name;
+                   //echo "number";
+              }
+
+            //print_r($sort_string_array);
+
+          } // if stock
+        
+
+        //$sort_me = sort($sort_number_array[0]);
+        //print_r($sort_me);
+    } // end foreach
+          echo "</div>";
+          if (empty($sort_string_array) ) {
+            return array( $sort_number_array );  
+          } 
+          else {
+            return array( $sort_string_array );  
+          } 
+          
+      
+      //return $sort_array; 
+
+  } // end if
+
+} // end of function
